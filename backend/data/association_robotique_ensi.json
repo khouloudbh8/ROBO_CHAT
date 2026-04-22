@@ -1,0 +1,101 @@
+{
+  "association": {
+    "nom": "Association Robotique ENSI",
+    "sigle": "AR-ENSI",
+    "type": "Association à but non lucratif",
+    "annee_creation": 2006,
+    "ecole": "École Nationale des Sciences de l'Informatique (ENSI)",
+    "localisation": "La Manouba, Tunisie",
+    "description": "L'ARE est une association à but non lucratif créée en 2006 à l'ENSI par des passionnés de robotique. Elle vise à stimuler la créativité des jeunes informaticiens et les aider à s'épanouir.",
+    "objectif": "Devenir une référence dans le domaine de la robotique en favorisant la croissance continue de ses membres au sein d'un environnement en perpétuelle évolution.",
+    "domaines": ["Informatique", "Électronique", "Mécanique", "Gestion de projet"],
+    "reseaux_sociaux": {
+      "facebook": "https://www.facebook.com/association.robotique.ensi",
+      "instagram": "@association.robotique.ensi",
+      "linkedin": "Association Robotique ENSI",
+      "youtube": "Association Robotique ENSI"
+    }
+  },
+  "poles": [
+    {
+      "nom": "Projet",
+      "description": "Pôle principal dédié à la conception et réalisation de projets robotiques."
+    },
+    {
+      "nom": "Développement Commercial",
+      "description": "Pôle chargé de la croissance et du développement des partenariats et sponsors de l'association."
+    },
+    {
+      "nom": "Média",
+      "description": "Pôle responsable de la communication, la couverture médiatique et la présence digitale de l'association."
+    }
+  ],
+  "axes": [
+    {
+      "nom": "Axe Formation",
+      "description": "Formation technique des membres dans les domaines clés de la robotique et de l'informatique.",
+      "technologies": [
+        "Arduino",
+        "Machine Learning",
+        "Raspberry Pi et IoT",
+        "ROS (Robot Operating System)",
+        "Intelligence Artificielle (IA)",
+        "Deep Learning"
+      ]
+    },
+    {
+      "nom": "Axe Événementiel",
+      "description": "Organisation d'événements compétitifs et formatifs liés à la robotique.",
+      "evenements": [
+        {
+          "nom": "RoboCup ENSI",
+          "description": "Compétition phare de l'association destinée aux élèves ingénieurs et amateurs de robotique. La première édition a eu lieu le 15 octobre 2017 avec comme thème 'Image processing and object tracking'. La 7ème édition a été organisée en 2024.",
+          "premiere_edition": 2017,
+          "derniere_edition_connue": "RoboCup ENSI 7.0 (2024)",
+          "competitions_internes": ["TaxiRobot", "PostRobot", "Need For Speed"]
+        },
+        {
+          "nom": "RoboDay",
+          "description": "Journée dédiée à la robotique, axée sur la découverte et le partage."
+        },
+        {
+          "nom": "SuperCup",
+          "description": "Compétition de haut niveau organisée par l'association."
+        },
+        {
+          "nom": "BootCamp",
+          "description": "Camp d'entraînement intensif pour former les membres aux technologies robotiques."
+        },
+        {
+          "nom": "Robocamp",
+          "description": "Camp robotique combinant formation pratique et activités de team building."
+        }
+      ]
+    },
+    {
+      "nom": "Axe Compétition",
+      "description": "Participation et organisation de compétitions robotiques.",
+      "types": [
+        "Organisation des compétitions internes",
+        "Organisation des compétitions externes"
+      ],
+      "competitions_exterieures_participees": [
+        "Tunirobots",
+        "ENIM-ROBOTS",
+        "Enicarthage Robots"
+      ]
+    },
+    {
+      "nom": "Axe Aéronautique",
+      "description": "Pôle spécialisé dans la conception et la maîtrise des drones et de l'aéronautique.",
+      "activites": [
+        "Apprentissage des bases de l'aéronautique",
+        "Construction des drones"
+      ]
+    }
+  ],
+  "chiffres_cles": {
+    "nombre_adherents_approximatif": 100,
+    "competitions_remportees": "Plusieurs prix obtenus lors de compétitions nationales"
+  }
+}

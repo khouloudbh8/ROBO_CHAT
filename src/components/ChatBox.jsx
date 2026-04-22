@@ -43,35 +43,47 @@ function ChatBox({ onMenuClick, user, onLoginRequest }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isTyping])
 
-  /* Envoi du message */
-  const sendMessage = () => {
-    const text = inputText.trim()
-    if (!text || isTyping || !isLoggedIn) return
+// Ajoute en haut du fichier
+const API_URL = 'http://localhost:5000'
 
-    const userMsg = {
-      id: Date.now(),
-      role: 'user',
-      text,
-      timestamp: new Date(),
-    }
+// Remplace sendMessage par :
+const sendMessage = async () => {
+  const text = inputText.trim()
+  if (!text || isTyping || !isLoggedIn) return
 
-    setMessages(prev => [...prev, userMsg])
-    setInputText('')
-    setIsTyping(true)
+  const userMsg = { id: Date.now(), role: 'user', text, timestamp: new Date() }
+  const newMessages = [...messages, userMsg]
+  setMessages(newMessages)
+  setInputText('')
+  setIsTyping(true)
 
-    /* Délai de simulation de frappe du bot (1.5 – 2.5 s) */
-    const delay = 1500 + Math.random() * 1000
-    setTimeout(() => {
-      const botMsg = {
-        id: Date.now() + 1,
-        role: 'bot',
-        text: getBotResponse(),
-        timestamp: new Date(),
-      }
-      setMessages(prev => [...prev, botMsg])
-      setIsTyping(false)
-    }, delay)
+  try {
+    // Préparer l'historique pour l'API (format Groq)
+    const history = newMessages
+      .filter(m => m.id !== 'welcome')
+      .map(m => ({ role: m.role === 'bot' ? 'assistant' : 'user', content: m.text }))
+
+    const token = localStorage.getItem('token')
+    const res = await fetch(`${API_URL}/api/chat/message`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ message: text, history })
+    })
+
+    const data = await res.json()
+    const botMsg = { id: Date.now() + 1, role: 'bot', text: data.reply, timestamp: new Date() }
+    setMessages(prev => [...prev, botMsg])
+
+  } catch (err) {
+    const errMsg = { id: Date.now() + 1, role: 'bot', text: '❌ Erreur de connexion au serveur.', timestamp: new Date() }
+    setMessages(prev => [...prev, errMsg])
+  } finally {
+    setIsTyping(false)
   }
+}
 
   /* Envoi avec Entrée (Shift+Entrée = saut de ligne) */
   const handleKeyDown = (e) => {

@@ -1,23 +1,85 @@
 import { useState } from 'react'
 import '../styles/Login.css'
 
-function Login({ onLogin }) {
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+const API_URL = 'http://localhost:5000'
 
-  const handleSubmit = (e) => {
+function Login({ onLogin }) {
+  const [mode, setMode]       = useState('login')   // 'login' | 'register'
+  const [form, setForm]       = useState({ name: '', email: '', password: '' })
+  const [error, setError]     = useState('')
+  const [success, setSuccess] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [showPass, setShowPass] = useState(false)
+
+  const handleChange = (e) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    setError('')
+    setSuccess('')
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
+    setSuccess('')
+
+    // Validation basique
     if (!form.email || !form.password) {
       setError('Veuillez remplir tous les champs.')
       return
     }
-    setError('')
+    if (mode === 'register' && !form.name) {
+      setError('Veuillez entrer votre nom.')
+      return
+    }
+    if (form.password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères.')
+      return
+    }
+
     setLoading(true)
-    setTimeout(() => {
+
+    try {
+      const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register'
+      const body = mode === 'login'
+        ? { email: form.email, password: form.password }
+        : { email: form.email, password: form.password, name: form.name }
+
+      const res = await fetch(`${API_URL}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Une erreur est survenue.')
+        return
+      }
+
+      // Sauvegarder le token JWT dans localStorage
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('user', JSON.stringify(data.user))
+
+      if (mode === 'register') {
+        setSuccess('Compte créé avec succès ! Connexion en cours...')
+        setTimeout(() => onLogin(data.user), 1000)
+      } else {
+        onLogin(data.user)
+      }
+
+    } catch (err) {
+      setError('Impossible de joindre le serveur. Vérifiez que le backend est lancé.')
+    } finally {
       setLoading(false)
-      onLogin({ email: form.email, name: form.email.split('@')[0] })
-    }, 1200)
+    }
+  }
+
+  const switchMode = () => {
+    setMode(m => m === 'login' ? 'register' : 'login')
+    setError('')
+    setSuccess('')
+    setForm({ name: '', email: '', password: '' })
   }
 
   return (
@@ -51,10 +113,55 @@ function Login({ onLogin }) {
 
         <div className="login-divider" />
 
-        <h2 className="login-title">Connexion</h2>
-        <p className="login-subtitle">Accédez à votre espace personnel</p>
+        {/* Toggle Login / Register */}
+        <div className="login-mode-toggle">
+          <button
+            className={`login-mode-btn ${mode === 'login' ? 'login-mode-btn--active' : ''}`}
+            onClick={() => { setMode('login'); setError(''); setSuccess(''); setForm({ name: '', email: '', password: '' }) }}
+            type="button"
+          >
+            Connexion
+          </button>
+          <button
+            className={`login-mode-btn ${mode === 'register' ? 'login-mode-btn--active' : ''}`}
+            onClick={() => { setMode('register'); setError(''); setSuccess(''); setForm({ name: '', email: '', password: '' }) }}
+            type="button"
+          >
+            Inscription
+          </button>
+        </div>
+
+        <h2 className="login-title">
+          {mode === 'login' ? 'Connexion' : 'Créer un compte'}
+        </h2>
+        <p className="login-subtitle">
+          {mode === 'login'
+            ? 'Accédez à votre espace personnel'
+            : 'Rejoignez la communauté AR-ENSI'}
+        </p>
 
         <form className="login-form" onSubmit={handleSubmit}>
+
+          {/* Champ Nom (register seulement) */}
+          {mode === 'register' && (
+            <div className="login-field">
+              <label className="login-label">Nom complet</label>
+              <div className="login-input-wrap">
+                <span className="login-input-icon">👤</span>
+                <input
+                  className="login-input"
+                  type="text"
+                  name="name"
+                  placeholder="Prénom Nom"
+                  value={form.name}
+                  onChange={handleChange}
+                  autoComplete="name"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Champ Email */}
           <div className="login-field">
             <label className="login-label">Email ENSI</label>
             <div className="login-input-wrap">
@@ -62,37 +169,66 @@ function Login({ onLogin }) {
               <input
                 className="login-input"
                 type="email"
+                name="email"
                 placeholder="prenom.nom@ensi.tn"
                 value={form.email}
-                onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                onChange={handleChange}
                 autoComplete="email"
               />
             </div>
           </div>
 
+          {/* Champ Mot de passe */}
           <div className="login-field">
             <label className="login-label">Mot de passe</label>
             <div className="login-input-wrap">
               <span className="login-input-icon">⬡</span>
               <input
                 className="login-input"
-                type="password"
+                type={showPass ? 'text' : 'password'}
+                name="password"
                 placeholder="••••••••"
                 value={form.password}
-                onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                autoComplete="current-password"
+                onChange={handleChange}
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               />
+              <button
+                type="button"
+                className="login-show-pass"
+                onClick={() => setShowPass(p => !p)}
+                tabIndex={-1}
+                aria-label={showPass ? 'Masquer' : 'Afficher'}
+              >
+                {showPass ? '🙈' : '👁'}
+              </button>
             </div>
           </div>
 
-          {error && <p className="login-error">{error}</p>}
+          {/* Message d'erreur */}
+          {error && (
+            <div className="login-error">
+              <span>⚠</span> {error}
+            </div>
+          )}
 
-          <button className={`login-btn ${loading ? 'login-btn--loading' : ''}`} type="submit" disabled={loading}>
+          {/* Message de succès */}
+          {success && (
+            <div className="login-success">
+              <span>✓</span> {success}
+            </div>
+          )}
+
+          {/* Bouton Submit */}
+          <button
+            className={`login-btn ${loading ? 'login-btn--loading' : ''}`}
+            type="submit"
+            disabled={loading}
+          >
             {loading ? (
               <span className="login-spinner" />
             ) : (
               <>
-                <span>Se connecter</span>
+                <span>{mode === 'login' ? 'Se connecter' : "S'inscrire"}</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -100,6 +236,15 @@ function Login({ onLogin }) {
             )}
           </button>
         </form>
+
+        {/* Switch mode */}
+        <p className="login-switch">
+          {mode === 'login' ? "Pas encore de compte ?" : "Déjà un compte ?"}
+          {' '}
+          <button className="login-switch-btn" onClick={switchMode} type="button">
+            {mode === 'login' ? "S'inscrire" : 'Se connecter'}
+          </button>
+        </p>
 
         <p className="login-footer">
           © 2025 Association Robotique ENSI · Tous droits réservés
